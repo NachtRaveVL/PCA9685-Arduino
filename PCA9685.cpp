@@ -156,7 +156,7 @@ void PCA9685::setChannelOn(int channel) {
 #endif
 
     writeChannelBegin(channel);
-    writeChannelPWM(0, PCA9685_PWM_FULL);
+    writeChannelPWM(PCA9685_PWM_FULL, 0);  // time_on = FULL; time_off = 0;
     writeChannelEnd();
 }
 
@@ -168,7 +168,7 @@ void PCA9685::setChannelOff(int channel) {
 #endif
 
     writeChannelBegin(channel);
-    writeChannelPWM(PCA9685_PWM_FULL, 0);
+    writeChannelPWM(0, PCA9685_PWM_FULL);  // time_on = 0; time_off = FULL;
     writeChannelEnd();
 }
 
@@ -229,7 +229,7 @@ void PCA9685::setAllChannelsPWM(uint16_t pwmAmount) {
     writeChannelBegin(-1); // Special value for ALLLED registers
 
     uint16_t phaseBegin, phaseEnd;
-    getPhaseCycle(0, pwmAmount, &phaseBegin, &phaseEnd);
+    getPhaseCycle(-1, pwmAmount, &phaseBegin, &phaseEnd);
 
     writeChannelPWM(phaseBegin, phaseEnd);
 
@@ -280,14 +280,24 @@ uint16_t PCA9685::getChannelPWM(int channel) {
     Serial.println(phaseEnd);
 #endif
 
+    // See datasheet section 7.3.3
     uint16_t retVal;
-    if (phaseBegin == PCA9685_PWM_FULL && phaseEnd == 0)
+    if (phaseEnd >= PCA9685_PWM_FULL)
+        // Full OFF
+        // Figure 11 Example 4: full OFF takes precedence over full ON
+        // See also remark after Table 7
         retVal = 0;
-    else if (phaseBegin == 0 && phaseEnd == PCA9685_PWM_FULL)
+    else if (phaseBegin >= PCA9685_PWM_FULL)
+        // Full ON
+        // Figure 9 Example 3
         retVal = PCA9685_PWM_FULL;
     else if (phaseBegin <= phaseEnd)
+        // start and finish in same cycle
+        // Section 7.3.3 example 1
         retVal = phaseEnd - phaseBegin;
     else
+        // span cycles
+        // Section 7.3.3 example 2
         retVal = (phaseEnd + PCA9685_PWM_FULL) - phaseBegin;
 
 #ifdef PCA9685_ENABLE_DEBUG_OUTPUT
@@ -456,31 +466,37 @@ void PCA9685::checkForErrors() {
 #endif
 
 void PCA9685::getPhaseCycle(int channel, uint16_t pwmAmount, uint16_t *phaseBegin, uint16_t *phaseEnd) {
-    if (pwmAmount == 0) {
-        *phaseBegin = PCA9685_PWM_FULL;
-        *phaseEnd = 0;
-    }
-    else if (pwmAmount >= PCA9685_PWM_FULL - 1) {
+    // Set delay
+    if (channel < 0) {
+        // All channels
         *phaseBegin = 0;
-        *phaseEnd = PCA9685_PWM_FULL;
     }
     else if (_phaseBalancer == PCA9685_PhaseBalancer_Linear) {
         // Distribute high phase area over entire phase range to balance load.
         *phaseBegin = channel * (4096 / 16);
-        *phaseEnd = *phaseBegin + pwmAmount;
-        if (*phaseEnd >= PCA9685_PWM_FULL)
-            *phaseEnd -= PCA9685_PWM_FULL;
     }
     else if (_phaseBalancer == PCA9685_PhaseBalancer_Weaved) {
         // Distribute high phase area over entire phase range to balance load.
         *phaseBegin = phaseDistTable[channel];
-        *phaseEnd = *phaseBegin + pwmAmount;
-        if (*phaseEnd >= PCA9685_PWM_FULL)
-            *phaseEnd -= PCA9685_PWM_FULL;
     }
     else {
         *phaseBegin = 0;
-        *phaseEnd = pwmAmount;
+    }
+    
+    // See datasheet section 7.3.3
+    if (pwmAmount == 0) {
+        // Full OFF => time_off[12] = 1;
+        *phaseEnd = PCA9685_PWM_FULL;
+    }
+    else if (pwmAmount >= PCA9685_PWM_FULL) {
+        // Full ON => time_on[12] = 1; time_off = ignored;
+        *phaseBegin |= PCA9685_PWM_FULL;
+        *phaseEnd = 0;
+    }
+    else {
+        *phaseEnd = *phaseBegin + pwmAmount;
+        if (*phaseEnd >= PCA9685_PWM_FULL)
+            *phaseEnd -= PCA9685_PWM_FULL;
     }
 }
 
