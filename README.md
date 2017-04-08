@@ -12,6 +12,8 @@ Forked by NachtRaveVL, July 29th, 2016.
 
 This library allows communication with boards running a PCA6985 16-channel PWM driver module. It supports a wide range of available functionality, from setting the output PWM frequecy, allowing multi-device proxy addressing, and provides an assistant class for working with Servos.
 
+The datasheet for the IC is available from <http://www.nxp.com/documents/data_sheet/PCA9685.pdf>.
+
 ## Library Setup
 
 There are several defines inside of the library's header file that allows for more fine-tuned control.
