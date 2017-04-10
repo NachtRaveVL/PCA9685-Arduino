@@ -1,0 +1,9 @@
+Date of pull : April 7 2017 OZ2CPU-thomas from denmark
+issue : pwm go NOT from 0 to 100% with values from 0-4095
+in the simpleexample
+    pwmController.setChannelPWM(0, value); // Set PWM value in channel 0
+    create an unsigned int value and perform this experiment:
+    try with value 0 = 100% pwm !!! error it should have given 0%
+    try with values over 3850 result is wierd wrap arround
+    
+    
