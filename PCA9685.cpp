@@ -844,7 +844,7 @@ uint16_t PCA9685_ServoEvaluator::pwmForAngle(float angle) {
         }
     }
     
-    return (uint16_t)constrain((int)roundf(retVal), 0, PCA9685_PWM_FULL);
+    return (uint16_t)constrain((uint16_t)roundf(retVal), 0, PCA9685_PWM_FULL);
 };
 
 #endif
