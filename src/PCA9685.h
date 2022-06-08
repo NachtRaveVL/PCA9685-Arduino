@@ -80,7 +80,9 @@
 #define PCA9685_I2C_BUFFER_LENGTH   32
 #endif // /if BUFFER_LENGTH
 #else
-#include <avr/io.h>
+#define USE_SOFT_I2C_MASTER_H_AS_PLAIN_INCLUDE
+#include "SoftI2CMaster.h"
+#undef USE_SOFT_I2C_MASTER_H_AS_PLAIN_INCLUDE
 #define PCA9685_USE_SOFTWARE_I2C
 #endif // /ifndef PCA9685_ENABLE_SOFTWARE_I2C
 
