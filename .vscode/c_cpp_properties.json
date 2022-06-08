@@ -35,7 +35,8 @@
                 "${PROGRAMFILES(X86)}/Arduino/hardware/teensy/avr/libraries/**",
                 "${USERPROFILE}/Documents/Arduino/libraries/**",
                 "${USERPROFILE}/Documents/Arduino/libraries/CoopTask/src/**",
-                "${USERPROFILE}/Documents/Arduino/libraries/Scheduler/src/**"
+                "${USERPROFILE}/Documents/Arduino/libraries/Scheduler/src/**",
+                "${USERPROFILE}/Documents/Arduino/libraries/SoftI2CMaster/src/**"
             ],
             "defines": [
                 "_DEBUG",

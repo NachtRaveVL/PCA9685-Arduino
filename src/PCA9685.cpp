@@ -5,7 +5,6 @@
 */
 
 #include "PCA9685.h"
-#include <assert.h>
 
 #define PCA9685_I2C_BASE_MODULE_ADDRESS (byte)0x40
 #define PCA9685_I2C_BASE_MODULE_ADRMASK (byte)0x3F

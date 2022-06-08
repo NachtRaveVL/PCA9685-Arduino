@@ -13,7 +13,7 @@ PCA9685 pwmControllerAll(PCA9685_I2C_DEF_ALLCALL_PROXYADR);
 void setup() {
     Serial.begin(115200);               // Begin Serial and Wire interfaces
     Wire.begin();
-    Wire.setClock(pwmController.getI2CSpeed());
+    Wire.setClock(min(pwmController1.getI2CSpeed(), pwmController2.getI2CSpeed()));
 
     pwmControllerAll.resetDevices();    // Resets all PCA9685 devices on i2c line
 

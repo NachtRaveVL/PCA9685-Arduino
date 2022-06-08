@@ -14,7 +14,7 @@ This library allows communication with boards running a PCA6985 16-channel PWM d
 
 Made primarily for Arduino microcontrollers, but should work with PlatformIO, ESP32/8266, Teensy, and others - although one might experience turbulence until the bug reports get ironed out. Unknown architectures must ensure `BUFFER_LENGTH` (or `I2C_BUFFER_LENGTH`) and `WIRE_INTERFACES_COUNT` are properly defined.
 
-Dependencies include: CoopTask (alternate to Scheduler, disableable), Scheduler (SAM/SAMD only, disableable), and SoftwareI2CLibrary (optional)
+Dependencies include: CoopTask (alternate to Scheduler, disableable), Scheduler (SAM/SAMD only, disableable), and SoftI2CMaster (optional)
 
 The datasheet for the IC is available at <http://www.nxp.com/documents/data_sheet/PCA9685.pdf>.
 
@@ -33,7 +33,7 @@ Alternatively, you may also refer to <https://forum.arduino.cc/index.php?topic=6
 From PCA9685.h:
 ```Arduino
 // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
-//#define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
+//#define PCA9685_ENABLE_SOFTWARE_I2C             // https://github.com/felias-fogg/SoftI2CMaster
 
 // Uncomment or -D this define to disable usage of the Scheduler library on SAM/SAMD architecures.
 //#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
@@ -309,7 +309,7 @@ PCA9685 pwmControllerAll(PCA9685_I2C_DEF_ALLCALL_PROXYADR);
 void setup() {
     Serial.begin(115200);               // Begin Serial and Wire interfaces
     Wire.begin();
-    Wire.setClock(pwmController.getI2CSpeed());
+    Wire.setClock(min(pwmController1.getI2CSpeed(), pwmController2.getI2CSpeed()));
 
     pwmControllerAll.resetDevices();    // Resets all PCA9685 devices on i2c line
 
@@ -435,14 +435,14 @@ void loop() {
 
 ### Software i2c Example
 
-In this example, we utilize a popular software i2c library for chips that do not have a hardware i2c bus, available at <http://playground.arduino.cc/Main/SoftwareI2CLibrary>.
+In this example, we utilize a popular software i2c library for chips that do not have a hardware i2c bus, available at <https://github.com/felias-fogg/SoftI2CMaster>.
 
 If one uncomments the line below inside the main header file (or defines it via custom build flag), software i2c mode for the library will be enabled. Additionally, you will need to correctly define `SCL_PIN`, `SCL_PORT`, `SDA_PIN`, and `SDA_PORT` according to your setup. `I2C_FASTMODE=1` should be set for 16MHz+ processors. Lastly note that, while in software i2c mode, the i2c clock speed returned by the library (via `getI2CSpeed()`) is only an upper bound and may not represent the actual i2c clock speed set nor achieved.
 
 In PCA9685.h:
 ```Arduino
 // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
-#define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
+#define PCA9685_ENABLE_SOFTWARE_I2C             // https://github.com/felias-fogg/SoftI2CMaster
 ```  
 Alternatively, in platform[.local].txt:
 ```Arduino

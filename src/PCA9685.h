@@ -32,7 +32,7 @@
 // will affect all projects compiled on your system using these library files.
 
 // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
-//#define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
+//#define PCA9685_ENABLE_SOFTWARE_I2C             // https://github.com/felias-fogg/SoftI2CMaster
 
 // Uncomment or -D this define to disable usage of the Scheduler library on SAM/SAMD architecures.
 //#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
