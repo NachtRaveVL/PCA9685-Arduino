@@ -12,7 +12,9 @@ Forked by NachtRaveVL, July 29th, 2016.
 
 This library allows communication with boards running a PCA6985 16-channel PWM driver module. It supports a wide range of available functionality, from setting the output PWM frequecy, allowing multi-device proxy addressing, and provides an assistant class for working with Servos.
 
-Made primarily for Arduino microcontrollers, but should work with PlatformIO, ESP32/8266, Teensy, and others - although one might want to ensure `BUFFER_LENGTH` (or `I2C_BUFFER_LENGTH`) and `WIRE_INTERFACES_COUNT` is properly defined for any architecture used.
+Made primarily for Arduino microcontrollers, but should work with PlatformIO, ESP32/8266, Teensy, and others - although one might experience turbulence until the bug reports get ironed out. Unknown architectures must ensure `BUFFER_LENGTH` (or `I2C_BUFFER_LENGTH`) and `WIRE_INTERFACES_COUNT` are properly defined.
+
+Dependencies include: CoopTask (alternate to Scheduler, disableable), Scheduler (SAM/SAMD only, disableable), and SoftwareI2CLibrary (optional)
 
 The datasheet for the IC is available at <http://www.nxp.com/documents/data_sheet/PCA9685.pdf>.
 
@@ -30,8 +32,14 @@ Alternatively, you may also refer to <https://forum.arduino.cc/index.php?topic=6
 
 From PCA9685.h:
 ```Arduino
-// Uncomment or -D this define to enable use of the software i2c library (min 4MHz+ processor).
+// Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 //#define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
+
+// Uncomment or -D this define to disable usage of the Scheduler library on SAM/SAMD architecures.
+//#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
+
+// Uncomment or -D this define to disable usage of the CoopTask library when Scheduler library not used.
+//#define PCA9685_DISABLE_COOPTASK                // https://github.com/dok-net/CoopTask
 
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS
@@ -400,7 +408,7 @@ If one uncomments the line below inside the main header file (or defines it via 
 
 In PCA9685.h:
 ```Arduino
-// Uncomment or -D this define to enable use of the software i2c library (min 4MHz+ processor).
+// Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 #define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
 ```  
 Alternatively, in platform[.local].txt:

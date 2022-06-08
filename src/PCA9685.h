@@ -31,11 +31,14 @@
 // the Arduino IDE's limited custom build flag support. Editing this header file directly
 // will affect all projects compiled on your system using these library files.
 
-// Uncomment or -D this define to enable use of the software i2c library (min 4MHz+ processor).
+// Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 //#define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
 
 // Uncomment or -D this define to disable usage of the Scheduler library on SAM/SAMD architecures.
 //#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
+
+// Uncomment or -D this define to disable usage of the CoopTask library when Scheduler library not used.
+//#define PCA9685_DISABLE_COOPTASK                // https://github.com/dok-net/CoopTask
 
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS
@@ -64,11 +67,7 @@
 #else
 #include <WProgram.h>
 #endif
-
-#if !defined(PCA9685_DISABLE_SCHEDULER) && (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD))
-#include "Scheduler.h"
-#define PCA9685_USE_SCHEDULER
-#endif
+#include <assert.h>
 
 #ifndef PCA9685_ENABLE_SOFTWARE_I2C
 #include <Wire.h>
@@ -84,6 +83,17 @@
 #include <avr/io.h>
 #define PCA9685_USE_SOFTWARE_I2C
 #endif // /ifndef PCA9685_ENABLE_SOFTWARE_I2C
+
+#if !defined(PCA9685_DISABLE_SCHEDULER) && (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD))
+#include "Scheduler.h"
+#define PCA9685_USE_SCHEDULER
+#define PCA9685_YIELD()                 Scheduler.yield()
+#endif
+#if !defined(PCA9685_DISABLE_COOPTASK) && !defined(PCA9685_USE_SCHEDULER)
+#include "CoopTask.h"
+#define PCA9685_USE_COOPTASK
+#define PCA9685_YIELD()                 yield()
+#endif
 
 
 // Default proxy addresser i2c addresses
@@ -182,10 +192,10 @@ public:
     // Boards with more than one i2c line (e.g. Due/Teensy/etc.) can supply a different
     // Wire instance, such as Wire1 (using SDA1/SCL1), Wire2 (using SDA2/SCL2), etc.
     // Supported i2c clock speeds are 100kHz, 400kHz (default), and 1000kHz.
-    PCA9685(byte i2cAddress = B000000, TwoWire& i2cWire = Wire, uint32_t i2cSpeed = 400000);
+    PCA9685(byte i2cAddress = B000000, TwoWire& i2cWire = Wire, uint32_t i2cSpeed = 400000U);
 
     // Convenience constructor for custom Wire instance. See main constructor.
-    PCA9685(TwoWire& i2cWire, uint32_t i2cSpeed = 400000, byte i2cAddress = B000000);
+    PCA9685(TwoWire& i2cWire, uint32_t i2cSpeed = 400000U, byte i2cAddress = B000000);
 
 #else
 
@@ -229,7 +239,7 @@ public:
 
     // Mode accessors
     byte getI2CAddress();                                   // i2c address
-    int getI2CSpeed();                                      // i2c clock speed (Hz)
+    uint32_t getI2CSpeed();                                 // i2c clock speed (Hz)
     PCA9685_OutputDriverMode getOutputDriverMode();         // Output driver mode
     PCA9685_OutputEnabledMode getOutputEnabledMode();       // Output enabled mode
     PCA9685_OutputDisabledMode getOutputDisabledMode();     // Output disabled mode

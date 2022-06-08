@@ -61,46 +61,46 @@ uint8_t __attribute__((noinline)) i2c_read(bool last);
 #endif
 
 static void uDelayMillisFuncDef(unsigned int timeout) {
-#ifdef PCA9685_USE_SCHEDULER
+#if defined(PCA9685_YIELD)
     if (timeout > 0) {
         unsigned long currTime = millis();
         unsigned long endTime = currTime + (unsigned long)timeout;
         if (currTime < endTime) { // not overflowing
             while (millis() < endTime)
-                Scheduler.yield();
+                PCA9685_YIELD();
         } else { // overflowing
             unsigned long begTime = currTime;
             while (currTime >= begTime || currTime < endTime) {
-                Scheduler.yield();
+                PCA9685_YIELD();
                 currTime = millis();
             }
         }
     } else
-        Scheduler.yield();
+        PCA9685_YIELD();
 #else
     delay(timeout);
 #endif
 }
 
 static void uDelayMicrosFuncDef(unsigned int timeout) {
-#ifdef PCA9685_USE_SCHEDULER
+#if defined(PCA9685_YIELD)
     if (timeout > 1000) {
         unsigned long currTime = micros();
         unsigned long endTime = currTime + (unsigned long)timeout;
         if (currTime < endTime) { // not overflowing
             while (micros() < endTime)
-                Scheduler.yield();
+                PCA9685_YIELD();
         } else { // overflowing
             unsigned long begTime = currTime;
             while (currTime >= begTime || currTime < endTime) {
-                Scheduler.yield();
+                PCA9685_YIELD();
                 currTime = micros();
             }
         }
     } else if (timeout > 0)
         delayMicroseconds(timeout);
     else
-        Scheduler.yield();
+        PCA9685_YIELD();
 #else
     delayMicroseconds(timeout);
 #endif
@@ -290,7 +290,7 @@ byte PCA9685::getI2CAddress() {
     return _i2cAddress;
 }
 
-int PCA9685::getI2CSpeed() {
+uint32_t PCA9685::getI2CSpeed() {
 #ifndef PCA9685_USE_SOFTWARE_I2C
     return _i2cSpeed;
 #else

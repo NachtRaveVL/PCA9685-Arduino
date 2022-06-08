@@ -8,7 +8,7 @@
 // custom build flags manually via modifying platform[.local].txt.
 //
 // In PCA9685.h:
-// // Uncomment or -D this define to enable use of the software i2c library (min 4MHz+ processor).
+// // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 // #define PCA9685_ENABLE_SOFTWARE_I2C             // http://playground.arduino.cc/Main/SoftwareI2CLibrary
 //
 // Alternatively, in platform[.local].txt:
