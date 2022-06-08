@@ -89,12 +89,10 @@
 #if !defined(PCA9685_DISABLE_SCHEDULER) && (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD))
 #include "Scheduler.h"
 #define PCA9685_USE_SCHEDULER
-#define PCA9685_YIELD()                 Scheduler.yield()
 #endif
 #if !defined(PCA9685_DISABLE_COOPTASK) && !defined(PCA9685_USE_SCHEDULER)
 #include "CoopTask.h"
 #define PCA9685_USE_COOPTASK
-#define PCA9685_YIELD()                 yield()
 #endif
 
 
@@ -252,9 +250,7 @@ public:
     // Sets user delay functions to call when a delay has to occur for processing to
     // continue. User functions here can customize what this means - typically it would
     // mean to call into a thread barrier() or yield() mechanism. Default implementation
-    // simply calls standard delay() and delayMicroseconds(), unless on SAM/SAMD
-    // architectures where Scheduler is available, in which case when timeout > 1ms
-    // Scheduler.yield() is called until timeout expires.
+    // is to call yield() when timeout >= 1ms, unless Scheduler and CoopTask are disabled.
     void setUserDelayFuncs(UserDelayFunc delayMillisFunc, UserDelayFunc delayMicrosFunc);
 
     // Min: 24Hz, Max: 1526Hz, Default: 200Hz. As Hz increases channel resolution

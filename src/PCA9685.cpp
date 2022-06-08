@@ -59,47 +59,50 @@ bool __attribute__((noinline)) PCA9685_i2c_write(uint8_t value) asm("ass_i2c_wri
 uint8_t __attribute__((noinline)) i2c_read(bool last);
 #endif
 
+
 static void uDelayMillisFuncDef(unsigned int timeout) {
-#if defined(PCA9685_YIELD)
+#if defined(PCA9685_USE_SCHEDULER) || defined(PCA9685_USE_COOPTASK)
     if (timeout > 0) {
         unsigned long currTime = millis();
         unsigned long endTime = currTime + (unsigned long)timeout;
         if (currTime < endTime) { // not overflowing
             while (millis() < endTime)
-                PCA9685_YIELD();
+                yield();
         } else { // overflowing
             unsigned long begTime = currTime;
             while (currTime >= begTime || currTime < endTime) {
-                PCA9685_YIELD();
+                yield();
                 currTime = millis();
             }
         }
-    } else
-        PCA9685_YIELD();
+    } else {
+        yield();
+    }
 #else
     delay(timeout);
 #endif
 }
 
 static void uDelayMicrosFuncDef(unsigned int timeout) {
-#if defined(PCA9685_YIELD)
+#if defined(PCA9685_USE_SCHEDULER) || defined(PCA9685_USE_COOPTASK)
     if (timeout > 1000) {
         unsigned long currTime = micros();
         unsigned long endTime = currTime + (unsigned long)timeout;
         if (currTime < endTime) { // not overflowing
             while (micros() < endTime)
-                PCA9685_YIELD();
+                yield();
         } else { // overflowing
             unsigned long begTime = currTime;
             while (currTime >= begTime || currTime < endTime) {
-                PCA9685_YIELD();
+                yield();
                 currTime = micros();
             }
         }
-    } else if (timeout > 0)
+    } else if (timeout > 0) {
         delayMicroseconds(timeout);
-    else
-        PCA9685_YIELD();
+    } else {
+        yield();
+    }
 #else
     delayMicroseconds(timeout);
 #endif
