@@ -47,6 +47,11 @@
             "files": ["ServoEvaluatorExample.ino"]
         },
         {
+            "name": "LEDExample",
+            "base": "examples/LEDExample",
+            "files": ["LEDExample.ino"]
+        },
+        {
             "name": "SoftwareI2CExample",
             "base": "examples/SoftwareI2CExample",
             "files": ["SoftwareI2CExample.ino"]
