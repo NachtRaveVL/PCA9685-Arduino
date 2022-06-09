@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Arduino",
+            "name": "ArduinoCode",
             "compilerPath": "${PROGRAMFILES(X86)}/Arduino/hardware/tools/avr/bin/avr-g++",
             "compilerArgs": [
                 "-w",
@@ -19,6 +19,7 @@
                 "${LocalAppData}/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino5/avr/include/**",
                 "${PROGRAMFILES(X86)}/Arduino/hardware/arduino/avr/cores/arduino/**",
                 "${PROGRAMFILES(X86)}/Arduino/hardware/arduino/avr/libraries/**",
+                "${PROGRAMFILES(X86)}/Arduino/libraries/**",
                 "${PROGRAMFILES(X86)}/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include/**",
                 "${PROGRAMFILES(X86)}/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include-fixed/**",
                 "${PROGRAMFILES(X86)}/Arduino/hardware/tools/avr/avr/include/**",
@@ -63,7 +64,9 @@
             ],
             "cStandard": "c11",
             "cppStandard": "c++14",
-            "forcedInclude": []
+            "forcedInclude": [
+                "${PROGRAMFILES(X86)}/Arduino/hardware/arduino/avr/cores/arduino/Arduino.h"
+            ]
         }
     ],
     "version": 4

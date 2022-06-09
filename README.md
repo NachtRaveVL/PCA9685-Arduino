@@ -208,7 +208,7 @@ From PCA9685.h, in class PCA9685:
 * Be aware that driving some 180° servos too far past their -90°/+90° operational range can cause a little plastic limiter pin to break off and get stuck inside of the servo's gearing, which could potentially cause the servo to become jammed and no longer function.
 * Continuous servos operate in much the same fashion as 180° servos, but instead of the 2.5%/12.5% pulse width controlling a -90°/+90° offset it controls a -1x/+1x speed multiplier, with 0x being parked/no-movement and -1x/+1x being maximum speed in either direction.
 
-See the `PCA9685_ServoEval` class to assist with calculating PWM values from Servo angle/speed values.
+See the `PCA9685_ServoEval` helper class to assist with calculating PWM values from Servo angle/speed values.
 
 ## Example Usage
 
@@ -341,7 +341,7 @@ void loop() {
 
 ### Servo Evaluator Example
 
-In this example, we utilize the `PCA9685_ServoEval` class to assist with setting PWM frequencies when working with servos.
+In this example, we utilize the `PCA9685_ServoEval` helper class to assist with setting PWM frequencies when working with servos.
 
 We will be using `Wire1`, which is only available on boards with SDA1/SCL1 (e.g. Due/Teensy/etc.) - change to `Wire` if `Wire1` is unavailable.
 

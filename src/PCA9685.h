@@ -303,7 +303,7 @@ public:
 #endif
 
 protected:
-    byte _i2cAddress;                                       // Module's i2c address (default: B000000)
+    byte _i2cAddr;                                          // Module's i2c address (default: B000000)
 #ifndef PCA9685_USE_SOFTWARE_I2C
     TwoWire* _i2cWire;                                      // Wire class instance (unowned) (default: Wire)
     uint32_t _i2cSpeed;                                     // Module's i2c clock speed (default: 400000)

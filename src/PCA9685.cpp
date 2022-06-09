@@ -114,7 +114,7 @@ static void uDelayMicrosFuncDef(unsigned int timeout) {
 PCA9685::PCA9685(byte i2cAddress, TwoWire& i2cWire, uint32_t i2cSpeed)
     // I2C 7-bit address is B 1 A5 A4 A3 A2 A1 A0
     // RW lsb bit added by Arduino core TWI library
-    : _i2cAddress(i2cAddress),
+    : _i2cAddr(i2cAddress),
       _i2cWire(&i2cWire),
       _i2cSpeed(i2cSpeed),
       _driverMode(PCA9685_OutputDriverMode_Undefined),
@@ -128,7 +128,7 @@ PCA9685::PCA9685(byte i2cAddress, TwoWire& i2cWire, uint32_t i2cSpeed)
 { }
 
 PCA9685::PCA9685(TwoWire& i2cWire, uint32_t i2cSpeed, byte i2cAddress)
-    : _i2cAddress(i2cAddress),
+    : _i2cAddr(i2cAddress),
       _i2cWire(&i2cWire),
       _i2cSpeed(i2cSpeed),
       _driverMode(PCA9685_OutputDriverMode_Undefined),
@@ -144,7 +144,7 @@ PCA9685::PCA9685(TwoWire& i2cWire, uint32_t i2cSpeed, byte i2cAddress)
 #else
 
 PCA9685::PCA9685(byte i2cAddress)
-    : _i2cAddress(i2cAddress),
+    : _i2cAddr(i2cAddress),
       _readBytes(0),
       _driverMode(PCA9685_OutputDriverMode_Undefined),
       _enabledMode(PCA9685_OutputEnabledMode_Undefined),
@@ -185,7 +185,7 @@ void PCA9685::init(PCA9685_OutputDriverMode driverMode,
                    PCA9685_PhaseBalancer phaseBalancer) {
     if (_isProxyAddresser) return;
 
-    _i2cAddress = PCA9685_I2C_BASE_MODULE_ADDRESS | (_i2cAddress & PCA9685_I2C_BASE_MODULE_ADRMASK);
+    _i2cAddr = PCA9685_I2C_BASE_MODULE_ADDRESS | (_i2cAddr & PCA9685_I2C_BASE_MODULE_ADRMASK);
 
     _driverMode = driverMode;
     _enabledMode = enabledMode;
@@ -201,7 +201,7 @@ void PCA9685::init(PCA9685_OutputDriverMode driverMode,
     Serial.print("PCA9685::init mode2Val: 0x");
     Serial.print(mode2Val, HEX);
     Serial.print(", i2cAddress: 0x");
-    Serial.print(_i2cAddress, HEX);
+    Serial.print(_i2cAddr, HEX);
     Serial.print(", i2cWire#: ");
     Serial.print(getWireInterfaceNumber());
     Serial.print(", i2cSpeed: ");
@@ -270,12 +270,12 @@ void PCA9685::init(PCA9685_PhaseBalancer phaseBalancer,
 void PCA9685::initAsProxyAddresser() {
     if (_driverMode != PCA9685_OutputDriverMode_Undefined) return;
 
-    _i2cAddress = PCA9685_I2C_BASE_PROXY_ADDRESS | (_i2cAddress & PCA9685_I2C_BASE_PROXY_ADRMASK);
+    _i2cAddr = PCA9685_I2C_BASE_PROXY_ADDRESS | (_i2cAddr & PCA9685_I2C_BASE_PROXY_ADRMASK);
     _isProxyAddresser = true;
 
 #ifdef PCA9685_ENABLE_DEBUG_OUTPUT
     Serial.println("PCA9685::initAsProxyAddresser i2cAddress: 0x");
-    Serial.print(_i2cAddress, HEX);
+    Serial.print(_i2cAddr, HEX);
     Serial.print(", i2cWire#: ");
     Serial.print(getWireInterfaceNumber());
     Serial.print(", i2cSpeed: ");
@@ -289,7 +289,7 @@ void PCA9685::initAsProxyAddresser() {
 }
 
 byte PCA9685::getI2CAddress() {
-    return _i2cAddress;
+    return _i2cAddr;
 }
 
 uint32_t PCA9685::getI2CSpeed() {
@@ -491,7 +491,7 @@ uint16_t PCA9685::getChannelPWM(int channel) {
     Serial.println(regAddress, HEX);
 #endif
 
-    i2cWire_beginTransmission(_i2cAddress);
+    i2cWire_beginTransmission(_i2cAddr);
     i2cWire_write(regAddress);
     if (i2cWire_endTransmission()) {
 #ifdef PCA9685_ENABLE_DEBUG_OUTPUT
@@ -500,7 +500,7 @@ uint16_t PCA9685::getChannelPWM(int channel) {
         return 0;
     }
 
-    int bytesRead = i2cWire_requestFrom((uint8_t)_i2cAddress, 4);
+    int bytesRead = i2cWire_requestFrom((uint8_t)_i2cAddr, 4);
     if (bytesRead != 4) {
         while (bytesRead-- > 0)
             i2cWire_read();
@@ -748,7 +748,7 @@ void PCA9685::writeChannelBegin(int channel) {
     Serial.println(regAddress, HEX);
 #endif
 
-    i2cWire_beginTransmission(_i2cAddress);
+    i2cWire_beginTransmission(_i2cAddr);
     i2cWire_write(regAddress);
 }
 
@@ -789,7 +789,7 @@ void PCA9685::writeRegister(byte regAddress, byte value) {
     Serial.println(value, HEX);
 #endif
 
-    i2cWire_beginTransmission(_i2cAddress);
+    i2cWire_beginTransmission(_i2cAddr);
     i2cWire_write(regAddress);
     i2cWire_write(value);
     i2cWire_endTransmission();
@@ -805,7 +805,7 @@ byte PCA9685::readRegister(byte regAddress) {
     Serial.println(regAddress, HEX);
 #endif
 
-    i2cWire_beginTransmission(_i2cAddress);
+    i2cWire_beginTransmission(_i2cAddr);
     i2cWire_write(regAddress);
     if (i2cWire_endTransmission()) {
 #ifdef PCA9685_ENABLE_DEBUG_OUTPUT
@@ -814,7 +814,7 @@ byte PCA9685::readRegister(byte regAddress) {
         return 0;
     }
 
-    int bytesRead = i2cWire_requestFrom((uint8_t)_i2cAddress, 1);
+    int bytesRead = i2cWire_requestFrom((uint8_t)_i2cAddr, 1);
     if (bytesRead != 1) {
         while (bytesRead-- > 0)
             i2cWire_read();
@@ -936,7 +936,7 @@ void PCA9685::printModuleInfo() {
     Serial.println(""); Serial.println(" ~~~ PCA9685 Module Info ~~~");
 
     Serial.println(""); Serial.print("i2c Address: ");
-    Serial.print("0x"); Serial.println(_i2cAddress, HEX);
+    Serial.print("0x"); Serial.println(_i2cAddr, HEX);
     Serial.print("i2c Instance: ");
     Serial.print(getWireInterfaceNumber()); Serial.print(": ");
     Serial.println(textForWireInterfaceNumber(getWireInterfaceNumber()));
