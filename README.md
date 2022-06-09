@@ -14,7 +14,7 @@ This library allows communication with boards running a PCA6985 16-channel PWM d
 
 Made primarily for Arduino microcontrollers, but should work with PlatformIO, ESP32/8266, Teensy, and others - although one might experience turbulence until the bug reports get ironed out. Unknown architectures must ensure `BUFFER_LENGTH` (or `I2C_BUFFER_LENGTH`) and `WIRE_INTERFACES_COUNT` are properly defined.
 
-Dependencies include: CoopTask (alternate to Scheduler, disableable), Scheduler (SAM/SAMD only, disableable), and SoftI2CMaster (optional)
+Dependencies include: CoopTask (alternate to Scheduler, disableable), Scheduler (SAM/SAMD only, disableable), and SoftI2CMaster (optional).
 
 The datasheet for the IC is available at <http://www.nxp.com/documents/data_sheet/PCA9685.pdf>.
 
