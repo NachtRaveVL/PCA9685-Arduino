@@ -14,7 +14,7 @@ This library allows communication with boards running a PCA6985 16-channel PWM d
 
 Made primarily for Arduino microcontrollers, but should work with PlatformIO, ESP32/8266, Teensy, and others - although one might experience turbulence until the bug reports get ironed out. Unknown architectures must ensure `BUFFER_LENGTH` (or `I2C_BUFFER_LENGTH`) and `WIRE_INTERFACES_COUNT` are properly defined.
 
-Dependencies include: CoopTask (alternate to Scheduler, disableable), Scheduler (SAM/SAMD only, disableable), and SoftI2CMaster (optional).
+Dependencies include: Scheduler (SAM/SAMD only, disableable), TaskScheduler (alternate to Scheduler, disableable), CoopTask (alternate to TaskScheduler, optional), and SoftI2CMaster (optional).
 
 The datasheet for the IC is available at <http://www.nxp.com/documents/data_sheet/PCA9685.pdf>.
 
@@ -26,7 +26,7 @@ The easiest way to install this library is to utilize the Arduino IDE library ma
 
 ### Header Defines
 
-There are several defines inside of the library's main header file that allow for more fine-tuned control of the library. You may edit and uncomment these lines directly, or supply them via custom build flags. While editing the main header file isn't ideal, it is often the easiest given the Arduino IDE's limited custom build flag support. Note that editing the library's main header file directly will affect all projects compiled on your system using those modified library files.
+There are several defines inside of the library's main header file that allow for more fine-tuned control of the library. You may edit and uncomment these lines directly, or supply them via custom build flags. While editing the main header file isn't ideal, it is often easiest. Note that editing the library's main header file directly will affect all projects compiled on your system using those modified library files.
 
 Alternatively, you may also refer to <https://forum.arduino.cc/index.php?topic=602603.0> on how to define custom build flags manually via modifying the platform[.local].txt file. Note that editing such directly will affect all other projects compiled on your system using those modified platform framework files.
 
@@ -35,11 +35,17 @@ From PCA9685.h:
 // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 //#define PCA9685_ENABLE_SOFTWARE_I2C             // https://github.com/felias-fogg/SoftI2CMaster
 
-// Uncomment or -D this define to disable usage of the Scheduler library on SAM/SAMD architecures.
+// Uncomment or -D this define to completely disable usage of any multitasking commands, such as yield().
+//#define PCA9685_DISABLE_MULTITASKING
+
+// Uncomment or -D this define to disable usage of the Scheduler library, for SAM/SAMD architechtures.
 //#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
 
-// Uncomment or -D this define to disable usage of the CoopTask library when Scheduler library not used.
-//#define PCA9685_DISABLE_COOPTASK                // https://github.com/dok-net/CoopTask
+// Uncomment or -D this define to disable usage of the TaskScheduler library, in place of Scheduler.
+//#define PCA9685_DISABLE_TASKSCHEDULER           // https://github.com/arkhipenko/TaskScheduler
+
+// Uncomment or -D this define to enable usage of the CoopTask library, in place of TaskScheduler and Scheduler.
+//#define PCA9685_ENABLE_COOPTASK                 // https://github.com/dok-net/CoopTask
 
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS

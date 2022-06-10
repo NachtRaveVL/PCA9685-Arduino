@@ -27,18 +27,22 @@
 
 // Library Setup
 
-// NOTE: While editing the main header file isn't ideal, it is often the easiest given
-// the Arduino IDE's limited custom build flag support. Editing this header file directly
-// will affect all projects compiled on your system using these library files.
+// NOTE: It is recommended to use custom build flags instead of editing this file directly.
 
 // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 //#define PCA9685_ENABLE_SOFTWARE_I2C             // https://github.com/felias-fogg/SoftI2CMaster
 
-// Uncomment or -D this define to disable usage of the Scheduler library on SAM/SAMD architecures.
+// Uncomment or -D this define to completely disable usage of any multitasking commands, such as yield().
+//#define PCA9685_DISABLE_MULTITASKING
+
+// Uncomment or -D this define to disable usage of the Scheduler library, for SAM/SAMD architechtures.
 //#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
 
-// Uncomment or -D this define to disable usage of the CoopTask library when Scheduler library not used.
-//#define PCA9685_DISABLE_COOPTASK                // https://github.com/dok-net/CoopTask
+// Uncomment or -D this define to disable usage of the TaskScheduler library, in place of Scheduler.
+//#define PCA9685_DISABLE_TASKSCHEDULER           // https://github.com/arkhipenko/TaskScheduler
+
+// Uncomment or -D this define to enable usage of the CoopTask library, in place of TaskScheduler and Scheduler.
+//#define PCA9685_ENABLE_COOPTASK                 // https://github.com/dok-net/CoopTask
 
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS
@@ -73,6 +77,7 @@
 
 #ifndef PCA9685_ENABLE_SOFTWARE_I2C
 #include <Wire.h>
+#define PCA9685_USE_HARDWARE_I2C
 #if BUFFER_LENGTH
 #define PCA9685_I2C_BUFFER_LENGTH   BUFFER_LENGTH
 #elif I2C_BUFFER_LENGTH
@@ -88,13 +93,27 @@
 #define PCA9685_USE_SOFTWARE_I2C
 #endif // /ifndef PCA9685_ENABLE_SOFTWARE_I2C
 
+#ifndef PCA9685_DISABLE_MULTITASKING
 #if !defined(PCA9685_DISABLE_SCHEDULER) && (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD))
 #include "Scheduler.h"
 #define PCA9685_USE_SCHEDULER
 #endif
-#if !defined(PCA9685_DISABLE_COOPTASK) && !defined(PCA9685_USE_SCHEDULER)
+#if !defined(PCA9685_DISABLE_TASKSCHEDULER) && !defined(PCA9685_USE_SCHEDULER)
+#include "TaskSchedulerDeclarations.h"
+#define PCA9685_USE_TASKSCHEDULER
+#define PCA9685_ENDLOOP(scheduler)     (scheduler).execute()
+#endif
+#if defined(PCA9685_ENABLE_COOPTASK) && !defined(PCA9685_USE_SCHEDULER) && !defined(PCA9685_USE_TASKSCHEDULER)
 #include "CoopTask.h"
 #define PCA9685_USE_COOPTASK
+#define PCA9685_ENDLOOP()              runCoopTasks()
+#endif
+#endif // /ifndef PCA9685_DISABLE_MULTITASKING
+#ifndef PCA9685_YIELD
+#define PCA9685_YIELD()                yield()
+#endif
+#ifndef PCA9685_ENDLOOP
+#define PCA9685_ENDLOOP()              yield()
 #endif
 
 
@@ -252,7 +271,7 @@ public:
     // Sets user delay functions to call when a delay has to occur for processing to
     // continue. User functions here can customize what this means - typically it would
     // mean to call into a thread barrier() or yield() mechanism. Default implementation
-    // is to call yield() when timeout >= 1ms, unless Scheduler and CoopTask are disabled.
+    // is to call yield() when timeout >= 1ms, unless disabled.
     void setUserDelayFuncs(UserDelayFunc delayMillisFunc, UserDelayFunc delayMicrosFunc);
 
     // Min: 24Hz, Max: 1526Hz, Default: 200Hz. As Hz increases channel resolution

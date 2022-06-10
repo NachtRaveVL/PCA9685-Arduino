@@ -61,22 +61,22 @@ uint8_t __attribute__((noinline)) i2c_read(bool last);
 
 
 static void uDelayMillisFuncDef(unsigned int timeout) {
-#if defined(PCA9685_USE_SCHEDULER) || defined(PCA9685_USE_COOPTASK)
+#ifndef PCA9685_DISABLE_MULTITASKING
     if (timeout > 0) {
         unsigned long currTime = millis();
         unsigned long endTime = currTime + (unsigned long)timeout;
         if (currTime < endTime) { // not overflowing
             while (millis() < endTime)
-                yield();
+                PCA9685_YIELD();
         } else { // overflowing
             unsigned long begTime = currTime;
             while (currTime >= begTime || currTime < endTime) {
-                yield();
+                PCA9685_YIELD();
                 currTime = millis();
             }
         }
     } else {
-        yield();
+        PCA9685_YIELD();
     }
 #else
     delay(timeout);
@@ -84,24 +84,24 @@ static void uDelayMillisFuncDef(unsigned int timeout) {
 }
 
 static void uDelayMicrosFuncDef(unsigned int timeout) {
-#if defined(PCA9685_USE_SCHEDULER) || defined(PCA9685_USE_COOPTASK)
+#ifndef PCA9685_DISABLE_MULTITASKING
     if (timeout > 1000) {
         unsigned long currTime = micros();
         unsigned long endTime = currTime + (unsigned long)timeout;
         if (currTime < endTime) { // not overflowing
             while (micros() < endTime)
-                yield();
+                PCA9685_YIELD();
         } else { // overflowing
             unsigned long begTime = currTime;
             while (currTime >= begTime || currTime < endTime) {
-                yield();
+                PCA9685_YIELD();
                 currTime = micros();
             }
         }
     } else if (timeout > 0) {
         delayMicroseconds(timeout);
     } else {
-        yield();
+        PCA9685_YIELD();
     }
 #else
     delayMicroseconds(timeout);
@@ -193,7 +193,7 @@ void PCA9685::init(PCA9685_OutputDriverMode driverMode,
     _updateMode = updateMode;
     _phaseBalancer = phaseBalancer;
 
-    assert(!(_driverMode == PCA9685_OutputDriverMode_OpenDrain && _disabledMode == PCA9685_OutputDisabledMode_High && "Unsupported combination"));
+    assert(!(_driverMode == PCA9685_OutputDriverMode_OpenDrain && _disabledMode == PCA9685_OutputDisabledMode_High) && "Unsupported combination");
 
     byte mode2Val = getMode2Value();
 

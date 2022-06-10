@@ -24,5 +24,6 @@
         "utility": "cpp",
         "variant": "cpp",
         "thread": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
