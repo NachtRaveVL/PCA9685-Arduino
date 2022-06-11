@@ -35,15 +35,6 @@
 // Uncomment or -D this define to completely disable usage of any multitasking commands, such as yield().
 //#define PCA9685_DISABLE_MULTITASKING
 
-// Uncomment or -D this define to disable usage of the Scheduler library, for SAM/SAMD architechtures.
-//#define PCA9685_DISABLE_SCHEDULER               // https://github.com/arduino-libraries/Scheduler
-
-// Uncomment or -D this define to disable usage of the TaskScheduler library, in place of Scheduler.
-//#define PCA9685_DISABLE_TASKSCHEDULER           // https://github.com/arkhipenko/TaskScheduler
-
-// Uncomment or -D this define to enable usage of the CoopTask library, in place of TaskScheduler and Scheduler.
-//#define PCA9685_ENABLE_COOPTASK                 // https://github.com/dok-net/CoopTask
-
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS
 
@@ -92,29 +83,6 @@
 #undef USE_SOFT_I2C_MASTER_H_AS_PLAIN_INCLUDE
 #define PCA9685_USE_SOFTWARE_I2C
 #endif // /ifndef PCA9685_ENABLE_SOFTWARE_I2C
-
-#ifndef PCA9685_DISABLE_MULTITASKING
-#if !defined(PCA9685_DISABLE_SCHEDULER) && (defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD))
-#include "Scheduler.h"
-#define PCA9685_USE_SCHEDULER
-#endif
-#if !defined(PCA9685_DISABLE_TASKSCHEDULER) && !defined(PCA9685_USE_SCHEDULER)
-#include "TaskSchedulerDeclarations.h"
-#define PCA9685_USE_TASKSCHEDULER
-#define PCA9685_ENDLOOP(scheduler)     (scheduler).execute()
-#endif
-#if defined(PCA9685_ENABLE_COOPTASK) && !defined(PCA9685_USE_SCHEDULER) && !defined(PCA9685_USE_TASKSCHEDULER)
-#include "CoopTask.h"
-#define PCA9685_USE_COOPTASK
-#define PCA9685_ENDLOOP()              runCoopTasks()
-#endif
-#endif // /ifndef PCA9685_DISABLE_MULTITASKING
-#ifndef PCA9685_YIELD
-#define PCA9685_YIELD()                yield()
-#endif
-#ifndef PCA9685_ENDLOOP
-#define PCA9685_ENDLOOP()              yield()
-#endif
 
 
 // Default proxy addresser i2c addresses
@@ -271,7 +239,7 @@ public:
     // Sets user delay functions to call when a delay has to occur for processing to
     // continue. User functions here can customize what this means - typically it would
     // mean to call into a thread barrier() or yield() mechanism. Default implementation
-    // is to call yield() when timeout >= 1ms, unless disabled.
+    // is to call yield() when timeout >= 1ms, unless multitasking is disabled.
     void setUserDelayFuncs(UserDelayFunc delayMillisFunc, UserDelayFunc delayMicrosFunc);
 
     // Min: 24Hz, Max: 1526Hz, Default: 200Hz. As Hz increases channel resolution
