@@ -41,21 +41,6 @@
 // Uncomment or -D this define to enable debug output.
 //#define PCA9685_ENABLE_DEBUG_OUTPUT
 
-// Hookup Callouts
-// -PLEASE READ-
-// Many digital servos run on a 20ms pulse width (50Hz update frequency) based duty cycle,
-// and do not utilize the entire pulse width for their control. Typically, 2.5% of the
-// 20ms pulse width (0.5ms) represents -90° offset, and 12.5% of the 20ms pulse width
-// (2.5ms) represents +90° offset. This roughly translates to raw PCA9685 PWM values of
-// 102 and 512 (out of the 4096/12-bit value range) for their -90°/+90° offset control.
-// However, these may need to be adjusted to fit your specific servo (e.g. some we've
-// tested run ~130 to ~525 for their -90°/+90° offset control). Be aware that driving
-// some 180° servos too far past their -90°/+90° operational range can cause a little
-// plastic limiter pin to break off and get stuck inside of the servo's gearing, which
-// could potentially cause the servo to become jammed and no longer function. Continuous
-// servos operate in much the same fashion as 180° servos, but instead of the 2.5%/12.5%
-// pulse width controlling a -90°/+90° offset it controls a -1x/+1x speed multiplier,
-// with 0x being parked/no-movement and -1x/+1x being maximum speed in either direction.
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>

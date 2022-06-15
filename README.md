@@ -196,9 +196,17 @@ From PCA9685.h, in class PCA9685:
 
 ## Hookup Callouts
 
+### I2C Bus
+
+I2C (aka I²C, IIC, TwoWire, TWI) devices can be chained together on the same shared bus lines (no flipping of wires), and are typically labeled `SCL` and `SDA`. Only different kinds of I2C devices can be used on the same bus line together using factory default settings, otherwise manual addressing must be done. I2C runs at mid to high KHz speeds and is useful for advanced device control.
+
+* When more than one I2C device of the same kind is to be used on the same bus line, each device must be set to use a different address. This is accomplished via the A0-A2 (sometimes A0-A5) pins/pads on the physical device that must be set either open or closed (typically via a de-solderable resistor, or by shorting a pin/pad). Check your specific breakout's datasheet for details.
+* This library also allows multiple PCA9685 devices to be controlled by one through its proxy addressing mode (see examples for sample usage).
+
 ### Servo Control
 
-* Many digital servos run on a 20ms pulse width (50Hz update frequency) based duty cycle, and do not utilize the entire pulse width for their control.
+Many digital servos run on a 20ms pulse width (50Hz update frequency) based duty cycle, and do not utilize the entire pulse width for their control. Some amount of error is to be expected with mass produced servos, with higher quality servos scaling with cost.
+
 * Typically, 2.5% of the 20ms pulse width (0.5ms) represents -90° offset, and 12.5% of the 20ms pulse width (2.5ms) represents +90° offset.
   * This roughly translates to raw PCA9685 PWM values of 102 and 512 (out of the 4096/12-bit value range) for their -90°/+90° offset control.
   * However, these may need to be adjusted to fit your specific servo (e.g. some we've tested run ~130 to ~525 for their -90°/+90° offset control).
