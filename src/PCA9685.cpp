@@ -60,53 +60,35 @@ uint8_t __attribute__((noinline)) i2c_read(bool last);
 #endif
 
 
-static void uDelayMillisFuncDef(unsigned int timeout) {
-#ifndef PCA9685_DISABLE_MULTITASKING
-    if (timeout > 0) {
-        unsigned long currTime = millis();
-        unsigned long endTime = currTime + (unsigned long)timeout;
-        if (currTime < endTime) { // not overflowing
-            while (millis() < endTime)
-                yield();
-        } else { // overflowing
-            unsigned long begTime = currTime;
-            while (currTime >= begTime || currTime < endTime) {
-                yield();
-                currTime = millis();
-            }
-        }
-    } else {
-        yield();
-    }
-#else
-    delay(timeout);
-#endif
+#ifdef PCA9685_ENABLE_DEBUG_OUTPUT
+
+static String PCA9685_makeAssertMsg(String msg, const char *file, const char *func, int line)
+{
+    return String(F("Assertion Failure: ")) + String(file) + String(':') + String(line) + String(F(" in ")) + String(func) + String(':') + String(' ') + msg;
 }
 
-static void uDelayMicrosFuncDef(unsigned int timeout) {
-#ifndef PCA9685_DISABLE_MULTITASKING
-    if (timeout > 1000) {
-        unsigned long currTime = micros();
-        unsigned long endTime = currTime + (unsigned long)timeout;
-        if (currTime < endTime) { // not overflowing
-            while (micros() < endTime)
-                yield();
-        } else { // overflowing
-            unsigned long begTime = currTime;
-            while (currTime >= begTime || currTime < endTime) {
-                yield();
-                currTime = micros();
-            }
-        }
-    } else if (timeout > 0) {
-        delayMicroseconds(timeout);
-    } else {
-        yield();
+void PCA9685_softAssert(bool cond, String msg, const char *file, const char *func, int line)
+{
+    if (!cond) {
+        String message = PCA9685_makeAssertMsg(msg, file, func, line);
+        if (Serial) { Serial.println(message); }
     }
-#else
-    delayMicroseconds(timeout);
-#endif
 }
+
+void PCA9685_hardAssert(bool cond, String msg, const char *file, const char *func, int line)
+{
+    if (!cond) {
+        String message = String(F("HARD ")) + PCA9685_makeAssertMsg(msg, file, func, line);
+        if (Serial) {
+            Serial.println(message);
+            Serial.flush();
+        }
+        yield(); delay(10);
+        abort();
+    }
+}
+
+#endif // /ifdef PCA9685_ENABLE_DEBUG_OUTPUT
 
 
 #ifndef PCA9685_USE_SOFTWARE_I2C
@@ -123,7 +105,6 @@ PCA9685::PCA9685(byte i2cAddress, TwoWire& i2cWire, uint32_t i2cSpeed)
       _updateMode(PCA9685_ChannelUpdateMode_Undefined),
       _phaseBalancer(PCA9685_PhaseBalancer_Undefined),
       _isProxyAddresser(false),
-      _uDelayMillisFunc(uDelayMillisFuncDef), _uDelayMicrosFunc(uDelayMicrosFuncDef),
       _lastI2CError(0)
 { }
 
@@ -137,7 +118,6 @@ PCA9685::PCA9685(TwoWire& i2cWire, uint32_t i2cSpeed, byte i2cAddress)
       _updateMode(PCA9685_ChannelUpdateMode_Undefined),
       _phaseBalancer(PCA9685_PhaseBalancer_Undefined),
       _isProxyAddresser(false),
-      _uDelayMillisFunc(uDelayMillisFuncDef), _uDelayMicrosFunc(uDelayMicrosFuncDef),
       _lastI2CError(0)
 { }
 
@@ -152,7 +132,6 @@ PCA9685::PCA9685(byte i2cAddress)
       _updateMode(PCA9685_ChannelUpdateMode_Undefined),
       _phaseBalancer(PCA9685_PhaseBalancer_Undefined),
       _isProxyAddresser(false),
-      _uDelayMillisFunc(uDelayMillisFuncDef), _uDelayMicrosFunc(uDelayMicrosFuncDef),
       _lastI2CError(0)
 { }
 
@@ -171,7 +150,7 @@ void PCA9685::resetDevices() {
     i2cWire_write(PCA9685_SW_RESET);
     i2cWire_endTransmission();
 
-    _uDelayMicrosFunc(10);
+    delayMicroseconds(10);
 
 #ifdef PCA9685_ENABLE_DEBUG_OUTPUT
     checkForErrors();
@@ -193,7 +172,7 @@ void PCA9685::init(PCA9685_OutputDriverMode driverMode,
     _updateMode = updateMode;
     _phaseBalancer = phaseBalancer;
 
-    assert(!(_driverMode == PCA9685_OutputDriverMode_OpenDrain && _disabledMode == PCA9685_OutputDisabledMode_High) && "Unsupported combination");
+    PCA9685_HARD_ASSERT(!(_driverMode == PCA9685_OutputDriverMode_OpenDrain && _disabledMode == PCA9685_OutputDisabledMode_High), F("Unsupported combination"));
 
     byte mode2Val = getMode2Value();
 
@@ -349,11 +328,6 @@ byte PCA9685::getMode2Value() {
     return mode2Val;
 }
 
-void PCA9685::setUserDelayFuncs(UserDelayFunc delayMillisFunc, UserDelayFunc delayMicrosFunc) {
-    _uDelayMillisFunc = delayMillisFunc ? delayMillisFunc : uDelayMillisFuncDef;
-    _uDelayMicrosFunc = delayMicrosFunc ? delayMicrosFunc : uDelayMicrosFuncDef;
-}
-
 void PCA9685::setPWMFrequency(float pwmFrequency) {
     if (pwmFrequency < 0 || _isProxyAddresser) return;
 
@@ -377,7 +351,7 @@ void PCA9685::setPWMFrequency(float pwmFrequency) {
 
     // It takes 500us max for the oscillator to be up and running once SLEEP bit has been set to logic 0.
     writeRegister(PCA9685_MODE1_REG, (mode1Reg = (mode1Reg & ~PCA9685_MODE1_SLEEP) | PCA9685_MODE1_RESTART));
-    _uDelayMicrosFunc(500);
+    delayMicroseconds(500);
 }
 
 void PCA9685::setPWMFreqServo() {
@@ -685,7 +659,7 @@ void PCA9685::enableExtClockLine() {
 
     // It takes 500us max for the oscillator to be up and running once SLEEP bit has been set to logic 0.
     writeRegister(PCA9685_MODE1_REG, (mode1Reg = (mode1Reg & ~PCA9685_MODE1_SLEEP) | PCA9685_MODE1_RESTART));
-    _uDelayMicrosFunc(500);
+    delayMicroseconds(500);
 }
 
 byte PCA9685::getLastI2CError() {

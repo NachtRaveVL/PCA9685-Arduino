@@ -51,6 +51,19 @@
 #endif
 #include <assert.h>
 
+#if defined(NDEBUG) && defined(PCA9685_ENABLE_DEBUG_OUTPUT)
+#undef PCA9685_ENABLE_DEBUG_OUTPUT
+#endif
+#ifdef PCA9685_ENABLE_DEBUG_OUTPUT
+#define PCA9685_SOFT_ASSERT(cond,msg)   PCA9685_softAssert((bool)(cond), String((msg)), __FILE__, __func__, __LINE__)
+#define PCA9685_HARD_ASSERT(cond,msg)   PCA9685_hardAssert((bool)(cond), String((msg)), __FILE__, __func__, __LINE__)
+extern void PCA9685_softAssert(bool, String, const char *, const char *, int);
+extern void PCA9685_hardAssert(bool, String, const char *, const char *, int);
+#else
+#define PCA9685_SOFT_ASSERT(cond,msg)   ((void)0)
+#define PCA9685_HARD_ASSERT(cond,msg)   ((void)0)
+#endif
+
 #ifndef PCA9685_ENABLE_SOFTWARE_I2C
 #include <Wire.h>
 #define PCA9685_USE_HARDWARE_I2C
