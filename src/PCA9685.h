@@ -32,13 +32,10 @@
 // Uncomment or -D this define to enable usage of the software i2c library (min 4MHz+ processor).
 //#define PCA9685_ENABLE_SOFTWARE_I2C             // https://github.com/felias-fogg/SoftI2CMaster
 
-// Uncomment or -D this define to completely disable usage of any multitasking commands, such as yield().
-//#define PCA9685_DISABLE_MULTITASKING
-
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS
 
-// Uncomment or -D this define to enable debug output.
+// Uncomment or -D this define to enable debug output (treats Serial as attached to serial monitor).
 //#define PCA9685_ENABLE_DEBUG_OUTPUT
 
 
