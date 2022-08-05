@@ -35,18 +35,15 @@
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
 //#define PCA9685_SWAP_PWM_BEG_END_REGS
 
-// Uncomment or -D this define to enable debug output (treats Serial as attached to serial monitor).
+// Uncomment or -D this define to enable debug output (treats Serial output as attached to serial monitor).
 //#define PCA9685_ENABLE_DEBUG_OUTPUT
 
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
-#elif defined(__MBED__)
-#include <mbed.h>
 #else
 #include <WProgram.h>
 #endif
-#include <assert.h>
 
 #if defined(NDEBUG) && defined(PCA9685_ENABLE_DEBUG_OUTPUT)
 #undef PCA9685_ENABLE_DEBUG_OUTPUT
